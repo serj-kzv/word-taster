@@ -215,10 +215,13 @@
     let wordListHTML = '<h2>All Word Pairs</h2>';
 
     for (const word in wordData) {
+      const disabledAttribute = wordData[word].disabled ? "disabled" : "";
       wordListHTML += `
         <div>
-          <strong>${word}</strong> - ${wordData[word].translation}
+          <input type="checkbox" id="${word}" ${disabledAttribute} onchange="toggleDisabled('${word}')">
+          <label for="${word}">${word}</label> - ${wordData[word].translation}
           <button onclick="toggleEditForm('${word}')">Edit</button>
+          <button onclick="deleteWordPair('${word}')">Delete</button>
           <div id="editForm_${word}" style="display: none;">
             <input type="text" class="editEnglishWord" placeholder="English word" value="${word}">
             <input type="text" class="editRussianTranslation" placeholder="Russian translation" value="${wordData[word].translation}">
@@ -234,6 +237,10 @@
     }
 
     wordListDiv.innerHTML = wordListHTML;
+  }
+
+  function toggleDisabled(word) {
+    wordData[word].disabled = !wordData[word].disabled;
   }
 
   function toggleEditForm(word) {
@@ -307,7 +314,8 @@
       if (allValidSynonyms) {
         wordData[editedWord] = {
           translation: editedTranslation,
-          synonyms: editedSynonyms
+          synonyms: editedSynonyms,
+          disabled: wordData[word].disabled // Preserve the disabled attribute
         };
 
         // If the word has been changed, delete the old word entry
@@ -327,6 +335,11 @@
         showAllWords();
       }
     }
+  }
+
+  function deleteWordPair(word) {
+    delete wordData[word];
+    showAllWords();
   }
 
   function cancelEdit(word) {
