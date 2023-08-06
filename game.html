@@ -18,7 +18,22 @@
   <input type="text" id="newSynonyms" placeholder="Enter synonyms separated by commas">
   <button onclick="addWordPair()">Add Word Pair</button>
 </div>
+<div>
+  <button onclick="toggleShowAllWords()">Show/Hide All Words</button>
+</div>
 <div id="errorMessage"></div>
+<div id="wordList" style="display: none;"></div>
+<div id="editForm" style="display: none;">
+  <h2>Edit Word Pair</h2>
+  <input type="text" id="editEnglishWord" placeholder="English word">
+  <input type="text" id="editRussianTranslation" placeholder="Russian translation">
+  <div id="editSynonyms">
+    <input type="text" class="synonymField" placeholder="Synonym">
+    <button onclick="addSynonymField()">Add Synonym</button>
+  </div>
+  <button onclick="saveEditedWordPair()">Save</button>
+  <button onclick="cancelEdit()">Cancel</button>
+</div>
 <script>
   // Object for both word pairs and synonyms
   let wordData = {
@@ -44,6 +59,7 @@
   let showSynonyms = true;
   let showTranslationMode = false;
   let currentIndex = 0;
+  let showAllWordsFlag = false;
 
   function getRandomWord() {
     const words = Object.keys(wordData);
@@ -116,6 +132,123 @@
 
       displayWord(); // Update the displayed word after adding new word pair
     }
+  }
+
+  function toggleShowAllWords() {
+    const wordListDiv = document.getElementById("wordList");
+    if (showAllWordsFlag) {
+      wordListDiv.style.display = "none";
+    } else {
+      wordListDiv.style.display = "block";
+      showAllWords();
+    }
+    showAllWordsFlag = !showAllWordsFlag;
+  }
+
+  function showAllWords() {
+    const wordListDiv = document.getElementById("wordList");
+    let wordListHTML = '<h2>All Word Pairs</h2>';
+
+    for (const word in wordData) {
+      wordListHTML += `
+        <div>
+          <strong>${word}</strong> - ${wordData[word].translation}
+          <button onclick="editWordPair('${word}')">Edit</button>
+        </div>
+      `;
+    }
+
+    wordListDiv.innerHTML = wordListHTML;
+  }
+
+  function editWordPair(word) {
+    const editFormDiv = document.getElementById("editForm");
+    const editEnglishWordInput = document.getElementById("editEnglishWord");
+    const editRussianTranslationInput = document.getElementById("editRussianTranslation");
+    const editSynonymsDiv = document.getElementById("editSynonyms");
+
+    editEnglishWordInput.value = word;
+    editRussianTranslationInput.value = wordData[word].translation;
+    editSynonymsDiv.innerHTML = "";
+
+    for (const synonym of wordData[word].synonyms) {
+      const synonymField = document.createElement("input");
+      synonymField.type = "text";
+      synonymField.className = "synonymField";
+      synonymField.value = synonym;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.innerText = "Delete";
+      deleteButton.onclick = function () {
+        editSynonymsDiv.removeChild(synonymField);
+        editSynonymsDiv.removeChild(deleteButton);
+      };
+
+      editSynonymsDiv.appendChild(synonymField);
+      editSynonymsDiv.appendChild(deleteButton);
+    }
+
+    const addSynonymButton = document.createElement("button");
+    addSynonymButton.innerText = "Add Synonym";
+    addSynonymButton.onclick = function () {
+      addSynonymField(editSynonymsDiv);
+    };
+
+    editSynonymsDiv.appendChild(addSynonymButton);
+
+    editFormDiv.style.display = "block";
+  }
+
+  function addSynonymField(parentDiv) {
+    const synonymField = document.createElement("input");
+    synonymField.type = "text";
+    synonymField.className = "synonymField";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.innerText = "Delete";
+    deleteButton.onclick = function () {
+      parentDiv.removeChild(synonymField);
+      parentDiv.removeChild(deleteButton);
+    };
+
+    parentDiv.insertBefore(synonymField, parentDiv.lastChild);
+    parentDiv.insertBefore(deleteButton, parentDiv.lastChild);
+  }
+
+  function saveEditedWordPair() {
+    const editEnglishWordInput = document.getElementById("editEnglishWord");
+    const editRussianTranslationInput = document.getElementById("editRussianTranslation");
+    const editSynonymFields = document.getElementsByClassName("synonymField");
+
+    const editedWord = editEnglishWordInput.value.trim().toLowerCase();
+    const editedTranslation = editRussianTranslationInput.value.trim();
+    const editedSynonyms = [];
+
+    for (const field of editSynonymFields) {
+      editedSynonyms.push(field.value.trim().toLowerCase());
+    }
+
+    if (editedWord !== "" && editedTranslation !== "") {
+      wordData[editedWord] = {
+        translation: editedTranslation,
+        synonyms: editedSynonyms
+      };
+
+      // If the word has been changed, delete the old word entry
+      const currentWord = Object.keys(wordData)[currentIndex];
+      if (editedWord !== currentWord) {
+        delete wordData[currentWord];
+      }
+
+      const editFormDiv = document.getElementById("editForm");
+      editFormDiv.style.display = "none";
+      showAllWords();
+    }
+  }
+
+  function cancelEdit() {
+    const editFormDiv = document.getElementById("editForm");
+    editFormDiv.style.display = "none";
   }
 
   // Initial display
