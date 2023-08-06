@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Word Translator</title>
+</head>
+<body>
+  <h1>Word Translator</h1>
+  <div>
+    <p id="wordDisplay"></p>
+    <button onclick="toggleSynonyms()">Toggle Synonyms</button>
+    <button onclick="nextWord()">Next Word</button>
+    <button onclick="displayTranslation()">Show Translation</button>
+    <button onclick="toggleShowSynonyms()">Show/Hide Synonyms</button>
+  </div>
+  <div>
+    <input type="text" id="newWord" placeholder="Enter English word">
+    <input type="text" id="newTranslation" placeholder="Enter Russian translation">
+    <input type="text" id="newSynonyms" placeholder="Enter synonyms separated by commas">
+    <button onclick="addWordPair()">Add Word Pair</button>
+  </div>
+  <script>
+    // Object for both word pairs and synonyms
+    let wordData = {
+      "hello": {
+        translation: "привет",
+        synonyms: ["hi", "hey", "greetings"]
+      },
+      "world": {
+        translation: "мир",
+        synonyms: ["earth", "globe", "planet"]
+      },
+      "goodbye": {
+        translation: "пока",
+        synonyms: ["farewell", "bye", "see you"]
+      },
+      "house": {
+        translation: "дом",
+        synonyms: ["home", "residence", "dwelling"]
+      },
+      // Add more word pairs as needed
+    };
+
+    let showSynonyms = true;
+    let showTranslationMode = false; // Renamed from displayTranslation
+    let currentIndex = 0;
+
+    function getRandomWord() {
+      const words = Object.keys(wordData);
+      const randomIndex = Math.floor(Math.random() * words.length);
+      return words[randomIndex];
+    }
+
+    function displayWord() {
+      const wordDisplay = document.getElementById("wordDisplay");
+      const word = Object.keys(wordData)[currentIndex];
+
+      if (showTranslationMode) {
+        const synonymsDisplay = showSynonyms ? `- ${wordData[word].synonyms.join(", ")}` : "";
+        wordDisplay.innerHTML = `<strong>${word}</strong> ${synonymsDisplay} - ${wordData[word].translation}`;
+      } else {
+        wordDisplay.innerText = showSynonyms ? `${word} - ${wordData[word].synonyms.join(", ")}` : word;
+      }
+    }
+
+    function toggleSynonyms() {
+      showSynonyms = !showSynonyms;
+      displayWord();
+    }
+
+    function toggleShowSynonyms() {
+      showSynonyms = !showSynonyms;
+      displayWord();
+    }
+
+    function nextWord() {
+      currentIndex = (currentIndex + 1) % Object.keys(wordData).length;
+      showTranslationMode = false; // Reset to default
+      displayWord();
+    }
+
+    function displayTranslation() {
+      showTranslationMode = true;
+      displayWord();
+    }
+
+    function addWordPair() {
+      const newWordInput = document.getElementById("newWord");
+      const newTranslationInput = document.getElementById("newTranslation");
+      const newSynonymsInput = document.getElementById("newSynonyms");
+      const newWord = newWordInput.value.trim().toLowerCase();
+      const newTranslation = newTranslationInput.value.trim();
+      const newSynonyms = newSynonymsInput.value.split(",").map(synonym => synonym.trim());
+
+      if (newWord !== "" && newTranslation !== "") {
+        wordData[newWord] = {
+          translation: newTranslation,
+          synonyms: newSynonyms
+        };
+        newWordInput.value = "";
+        newTranslationInput.value = "";
+        newSynonymsInput.value = "";
+      }
+    }
+
+    // Initial display
+    displayWord();
+  </script>
+</body>
+</html>
