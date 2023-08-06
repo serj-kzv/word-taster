@@ -6,8 +6,9 @@
 <body>
 <h1>Word Translator</h1>
 <div>
-  <input type="file" id="fileInput" accept=".json" onchange="handleFileInput(event)">
-  <button onclick="loadWords()">Load Words</button>
+  <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadWordsFromFile(event)">
+  <button onclick="openFile()">Load Words</button>
+  <button onclick="saveWords()">Save Words</button>
 </div>
 <div>
   <p id="wordDisplay"></p>
@@ -27,17 +28,7 @@
 </div>
 <div id="errorMessage"></div>
 <div id="wordList" style="display: none;"></div>
-<div id="editForm" style="display: none;">
-  <h2>Edit Word Pair</h2>
-  <input type="text" id="editEnglishWord" placeholder="English word">
-  <input type="text" id="editRussianTranslation" placeholder="Russian translation">
-  <div id="editSynonyms">
-    <input type="text" class="synonymField" placeholder="Synonym">
-    <button onclick="addSynonymField()">Add Synonym</button>
-  </div>
-  <button onclick="saveEditedWordPair()">Save</button>
-  <button onclick="cancelEdit()">Cancel</button>
-</div>
+<div id="editForm" style="display: none;"></div>
 <script>
   // Object for both word pairs and synonyms
   let wordData = {
@@ -159,7 +150,17 @@
       wordListHTML += `
         <div>
           <strong>${word}</strong> - ${wordData[word].translation}
-          <button onclick="editWordPair('${word}')">Edit</button>
+          <button onclick="toggleEditForm('${word}')">Edit</button>
+          <div id="editForm_${word}" style="display: none;">
+            <input type="text" class="editEnglishWord" placeholder="English word" value="${word}">
+            <input type="text" class="editRussianTranslation" placeholder="Russian translation" value="${wordData[word].translation}">
+            <div id="editSynonyms_${word}">
+              ${generateSynonymFields(word)}
+            </div>
+            <button onclick="addSynonymField('editSynonyms_${word}')">Add Synonym</button>
+            <button onclick="saveEditedWordPair('${word}')">Save</button>
+            <button onclick="cancelEdit('${word}')">Cancel</button>
+          </div>
         </div>
       `;
     }
@@ -167,49 +168,24 @@
     wordListDiv.innerHTML = wordListHTML;
   }
 
-  function toggleEditForm() {
-    const editFormDiv = document.getElementById("editForm");
-    editFormDiv.style.display = editFormDiv.style.display === "block" ? "none" : "block";
+  function toggleEditForm(word) {
+    const editFormDiv = document.getElementById(`editForm_${word}`);
+    editFormDiv.style.display = editFormDiv.style.display === "none" ? "block" : "none";
   }
 
-  function editWordPair(word) {
-    const editEnglishWordInput = document.getElementById("editEnglishWord");
-    const editRussianTranslationInput = document.getElementById("editRussianTranslation");
-    const editSynonymsDiv = document.getElementById("editSynonyms");
-
-    editEnglishWordInput.value = word;
-    editRussianTranslationInput.value = wordData[word].translation;
-    editSynonymsDiv.innerHTML = "";
-
+  function generateSynonymFields(word) {
+    let synonymFieldsHTML = "";
     for (const synonym of wordData[word].synonyms) {
-      const synonymField = document.createElement("input");
-      synonymField.type = "text";
-      synonymField.className = "synonymField";
-      synonymField.value = synonym;
-
-      const deleteButton = document.createElement("button");
-      deleteButton.innerText = "Delete";
-      deleteButton.onclick = function () {
-        editSynonymsDiv.removeChild(synonymField);
-        editSynonymsDiv.removeChild(deleteButton);
-      };
-
-      editSynonymsDiv.appendChild(synonymField);
-      editSynonymsDiv.appendChild(deleteButton);
+      synonymFieldsHTML += `
+        <input type="text" class="synonymField" placeholder="Synonym" value="${synonym}">
+        <button onclick="deleteSynonymField(this)">Delete</button>
+      `;
     }
-
-    const addSynonymButton = document.createElement("button");
-    addSynonymButton.innerText = "Add Synonym";
-    addSynonymButton.onclick = function () {
-      addSynonymField(editSynonymsDiv);
-    };
-
-    editSynonymsDiv.appendChild(addSynonymButton);
-
-    toggleEditForm();
+    return synonymFieldsHTML;
   }
 
-  function addSynonymField(parentDiv) {
+  function addSynonymField(parentId) {
+    const parentDiv = document.getElementById(parentId);
     const synonymField = document.createElement("input");
     synonymField.type = "text";
     synonymField.className = "synonymField";
@@ -217,18 +193,24 @@
     const deleteButton = document.createElement("button");
     deleteButton.innerText = "Delete";
     deleteButton.onclick = function () {
-      parentDiv.removeChild(synonymField);
-      parentDiv.removeChild(deleteButton);
+      deleteSynonymField(this);
     };
 
     parentDiv.insertBefore(synonymField, parentDiv.lastChild);
     parentDiv.insertBefore(deleteButton, parentDiv.lastChild);
   }
 
-  function saveEditedWordPair() {
-    const editEnglishWordInput = document.getElementById("editEnglishWord");
-    const editRussianTranslationInput = document.getElementById("editRussianTranslation");
-    const editSynonymFields = document.getElementsByClassName("synonymField");
+  function deleteSynonymField(deleteButton) {
+    const parentDiv = deleteButton.parentNode;
+    parentDiv.removeChild(deleteButton); // Remove the delete button
+    parentDiv.removeChild(parentDiv.lastChild); // Remove the corresponding input field
+  }
+
+  function saveEditedWordPair(word) {
+    const editFormDiv = document.getElementById(`editForm_${word}`);
+    const editEnglishWordInput = editFormDiv.querySelector(".editEnglishWord");
+    const editRussianTranslationInput = editFormDiv.querySelector(".editRussianTranslation");
+    const editSynonymFields = editFormDiv.getElementsByClassName("synonymField");
 
     const editedWord = editEnglishWordInput.value.trim().toLowerCase();
     const editedTranslation = editRussianTranslationInput.value.trim();
@@ -245,24 +227,26 @@
       };
 
       // If the word has been changed, delete the old word entry
-      const currentWord = Object.keys(wordData)[currentIndex];
-      if (editedWord !== currentWord) {
-        delete wordData[currentWord];
+      if (editedWord !== word) {
+        delete wordData[word];
       }
 
-      const editFormDiv = document.getElementById("editForm");
-      editFormDiv.style.display = "none";
+      toggleEditForm(word);
       showAllWords();
     }
   }
 
-  function cancelEdit() {
-    const editFormDiv = document.getElementById("editForm");
-    editFormDiv.style.display = "none";
+  function cancelEdit(word) {
+    toggleEditForm(word);
+  }
+
+  function openFile() {
+    const fileInput = document.getElementById("fileInput");
+    fileInput.click();
   }
 
   // Function to handle the file input and read JSON data
-  function handleFileInput(event) {
+  function loadWordsFromFile(event) {
     const file = event.target.files[0];
     const reader = new FileReader();
 
@@ -281,10 +265,18 @@
     reader.readAsText(file);
   }
 
-  // Function to load words from the wordData object
-  function loadWords() {
-    const fileInput = document.getElementById("fileInput");
-    fileInput.click();
+  // Function to save words to a JSON file
+  function saveWords() {
+    const jsonData = JSON.stringify(wordData, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "wordPairs.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 
   // Initial display
