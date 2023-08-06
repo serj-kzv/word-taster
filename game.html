@@ -270,8 +270,9 @@
 
   function deleteSynonymField(deleteButton) {
     const parentDiv = deleteButton.parentNode;
+    const indexToDelete = Array.from(parentDiv.children).indexOf(deleteButton) - 1;
     parentDiv.removeChild(deleteButton); // Remove the delete button
-    parentDiv.removeChild(parentDiv.lastChild); // Remove the corresponding input field
+    parentDiv.removeChild(parentDiv.children[indexToDelete]); // Remove the corresponding input field
   }
 
   function saveEditedWordPair(word) {
