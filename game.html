@@ -36,17 +36,65 @@
       translation: "привет",
       synonyms: ["hi", "hey", "greetings"]
     },
+    "greetings": {
+      translation: "привет",
+      synonyms: ["hello", "hi", "hey"]
+    },
+    "hi": {
+      translation: "привет",
+      synonyms: ["hello", "greetings", "hey"]
+    },
+    "hey": {
+      translation: "привет",
+      synonyms: ["hello", "greetings", "hi"]
+    },
     "world": {
       translation: "мир",
       synonyms: ["earth", "globe", "planet"]
+    },
+    "earth": {
+      translation: "мир",
+      synonyms: ["world", "globe", "planet"]
+    },
+    "globe": {
+      translation: "мир",
+      synonyms: ["world", "earth", "planet"]
+    },
+    "planet": {
+      translation: "мир",
+      synonyms: ["world", "earth", "globe"]
     },
     "goodbye": {
       translation: "пока",
       synonyms: ["farewell", "bye", "see you"]
     },
+    "farewell": {
+      translation: "пока",
+      synonyms: ["goodbye", "bye", "see you"]
+    },
+    "bye": {
+      translation: "пока",
+      synonyms: ["goodbye", "farewell", "see you"]
+    },
+    "see you": {
+      translation: "пока",
+      synonyms: ["goodbye", "farewell", "bye"]
+    },
     "house": {
       translation: "дом",
       synonyms: ["home", "residence", "dwelling"]
+    },
+    "home": {
+      translation: "дом",
+      synonyms: ["house", "residence", "dwelling"]
+    },
+    "residence": {
+      translation: "дом",
+      synonyms: ["house", "home", "dwelling"]
+    },
+    "dwelling": {
+      translation: "дом",
+      synonyms: ["house", "home", "residence"]
     },
     // Add more word pairs as needed
   };
@@ -104,28 +152,48 @@
     const newSynonyms = newSynonymsInput.value.split(",").map(synonym => synonym.trim().toLowerCase());
 
     if (newWord !== "" && newTranslation !== "") {
-      wordData[newWord] = {
-        translation: newTranslation,
-        synonyms: []
-      };
-
+      // Check if all synonyms are valid words
+      let allValidSynonyms = true;
       for (const synonym of newSynonyms) {
-        if (wordData.hasOwnProperty(synonym)) {
-          wordData[newWord].synonyms.push(synonym);
-        } else {
+        if (!wordData.hasOwnProperty(synonym)) {
+          allValidSynonyms = false;
           const errorMessageDiv = document.getElementById("errorMessage");
-          errorMessageDiv.innerText = `Warning: Synonym "${synonym}" doesn't exist as an English word. It will not be added.`;
+          errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
           setTimeout(() => {
             errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
-          }, 3000);
+          }, 5000);
+          break;
         }
       }
 
-      newWordInput.value = "";
-      newTranslationInput.value = "";
-      newSynonymsInput.value = "";
+      if (allValidSynonyms) {
+        // Add the new word pair and its synonyms to the wordData object
+        wordData[newWord] = {
+          translation: newTranslation,
+          synonyms: newSynonyms
+        };
 
-      displayWord(); // Update the displayed word after adding new word pair
+        for (const synonym of newSynonyms) {
+          // Add the synonym and its translation to wordData if it doesn't exist
+          if (!wordData.hasOwnProperty(synonym)) {
+            wordData[synonym] = {
+              translation: "", // You can set the translation for each synonym separately
+              synonyms: [] // You can set the synonyms for each synonym separately
+            };
+          }
+
+          // Add the word as a synonym to the synonym's wordData entry
+          if (!wordData[synonym].synonyms.includes(newWord)) {
+            wordData[synonym].synonyms.push(newWord);
+          }
+        }
+
+        newWordInput.value = "";
+        newTranslationInput.value = "";
+        newSynonymsInput.value = "";
+
+        displayWord(); // Update the displayed word after adding new word pair
+      }
     }
   }
 
@@ -221,18 +289,42 @@
     }
 
     if (editedWord !== "" && editedTranslation !== "") {
-      wordData[editedWord] = {
-        translation: editedTranslation,
-        synonyms: editedSynonyms
-      };
-
-      // If the word has been changed, delete the old word entry
-      if (editedWord !== word) {
-        delete wordData[word];
+      // Check if all synonyms are valid words
+      let allValidSynonyms = true;
+      for (const synonym of editedSynonyms) {
+        if (!wordData.hasOwnProperty(synonym)) {
+          allValidSynonyms = false;
+          const errorMessageDiv = document.getElementById("errorMessage");
+          errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
+          setTimeout(() => {
+            errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
+          }, 5000);
+          break;
+        }
       }
 
-      toggleEditForm(word);
-      showAllWords();
+      if (allValidSynonyms) {
+        wordData[editedWord] = {
+          translation: editedTranslation,
+          synonyms: editedSynonyms
+        };
+
+        // If the word has been changed, delete the old word entry
+        if (editedWord !== word) {
+          delete wordData[word];
+        }
+
+        // Update synonyms for other words that had the old word as a synonym
+        for (const otherWord in wordData) {
+          if (wordData[otherWord].synonyms.includes(word)) {
+            const synonymIndex = wordData[otherWord].synonyms.indexOf(word);
+            wordData[otherWord].synonyms.splice(synonymIndex, 1, editedWord);
+          }
+        }
+
+        toggleEditForm(word);
+        showAllWords();
+      }
     }
   }
 
