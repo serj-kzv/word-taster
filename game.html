@@ -26,6 +26,7 @@
 </div>
 <div>
   <button onclick="toggleShowAllWords()">Show/Hide All Words</button>
+  <button onclick="deleteAllWords()">Delete All</button> <!-- New Delete All button -->
 </div>
 <div id="errorMessage"></div>
 <div id="wordList" style="display: none;"></div>
@@ -219,10 +220,10 @@
     let wordListHTML = '<h2>All Word Pairs</h2>';
 
     for (const word in wordData) {
-      const disabledAttribute = wordData[word].disabled ? "disabled" : "";
+      const disabledAttribute = wordData[word].disabled ? "true" : "false";
       wordListHTML += `
         <div>
-          <input type="checkbox" id="${word}" ${disabledAttribute} onchange="toggleDisabled('${word}')">
+          <input type="checkbox" id="${word}" checked="${disabledAttribute}" onchange="toggleDisabled('${word}')">
           <label for="${word}">${word}</label> - ${wordData[word].translation}
           <button onclick="toggleEditForm('${word}')">Edit</button>
           <button onclick="deleteWordPair('${word}')">Delete</button>
@@ -387,6 +388,17 @@
     a.click();
 
     URL.revokeObjectURL(url);
+  }
+
+  // Add deleteAllWords function
+  function deleteAllWords() {
+    const confirmed = confirm("Are you sure you want to delete all word pairs?");
+    if (confirmed) {
+      wordData = {}; // Clear the wordData object
+      currentIndex = 0; // Reset the current index to 0
+      showAllWordsFlag = false; // Hide the word list if open
+      displayWord(); // Display the first word (or empty) after deleting all words
+    }
   }
 
   // Initial display
