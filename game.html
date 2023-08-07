@@ -2,21 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Word Translator</title>
+  <title>Word Taster</title>
 </head>
 <body>
-<h1>Word Translator</h1>
 <div>
   <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadWordsFromFile(event)">
   <button onclick="openFile()">Load Words</button>
   <button onclick="saveWords()">Save Words</button>
+  <button onclick="deleteAllWords()">Delete All</button>
 </div>
 <div>
   <p id="wordDisplay"></p>
-  <button onclick="toggleSynonyms()">Toggle Synonyms</button>
+</div>
+<div>
   <button onclick="nextWord()">Next Word</button>
+</div>
+<div>
+  <button onclick="toggleSynonyms()">Toggle Synonyms</button>
   <button onclick="displayTranslation()">Show Translation</button>
-  <button onclick="toggleShowSynonyms()">Show/Hide Synonyms</button>
 </div>
 <div>
   <input type="text" id="newWord" placeholder="Enter English word">
@@ -26,7 +29,6 @@
 </div>
 <div>
   <button onclick="toggleShowAllWords()">Show/Hide All Words</button>
-  <button onclick="deleteAllWords()">Delete All</button> <!-- New Delete All button -->
 </div>
 <div id="errorMessage"></div>
 <div id="wordList" style="display: none;"></div>
@@ -121,11 +123,6 @@
   }
 
   function toggleSynonyms() {
-    showSynonyms = !showSynonyms;
-    displayWord();
-  }
-
-  function toggleShowSynonyms() {
     showSynonyms = !showSynonyms;
     displayWord();
   }
