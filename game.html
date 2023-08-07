@@ -134,7 +134,10 @@
   }
 
   function nextWord() {
-    currentIndex = (currentIndex + 1) % Object.keys(wordData).length;
+    const words = Object.keys(wordData).filter(word => !wordData[word].disabled);
+    if (words.length === 0) return; // No enabled words left
+
+    currentIndex = (currentIndex + 1) % words.length;
     showTranslationMode = false; // Reset to default
     displayWord();
   }
