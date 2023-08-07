@@ -106,12 +106,6 @@
   let currentIndex = 0;
   let showAllWordsFlag = false;
 
-  function getRandomWord() {
-    const words = Object.keys(wordData);
-    const randomIndex = Math.floor(Math.random() * words.length);
-    return words[randomIndex];
-  }
-
   function displayWord() {
     const wordDisplay = document.getElementById("wordDisplay");
     const word = Object.keys(wordData)[currentIndex];
@@ -154,7 +148,9 @@
     const newSynonymsInput = document.getElementById("newSynonyms");
     const newWord = newWordInput.value.trim().toLowerCase();
     const newTranslation = newTranslationInput.value.trim();
-    const newSynonyms = newSynonymsInput.value.split(",").map(synonym => synonym.trim().toLowerCase());
+    const newSynonyms = newSynonymsInput.value.split(",")
+            .filter(value => value.length > 0)
+            .map(synonym => synonym.trim().toLowerCase());
 
     if (newWord !== "" && newTranslation !== "") {
       // Check if all synonyms are valid words
