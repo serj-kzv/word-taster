@@ -159,15 +159,18 @@
     if (newWord !== "" && newTranslation !== "") {
       // Check if all synonyms are valid words
       let allValidSynonyms = true;
-      for (const synonym of newSynonyms) {
-        if (!wordData.hasOwnProperty(synonym)) {
-          allValidSynonyms = false;
-          const errorMessageDiv = document.getElementById("errorMessage");
-          errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
-          setTimeout(() => {
-            errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
-          }, 5000);
-          break;
+
+      if (!!newSynonymsInput.value && newSynonymsInput.value.length > 0) {
+        for (const synonym of newSynonyms) {
+          if (!wordData.hasOwnProperty(synonym)) {
+            allValidSynonyms = false;
+            const errorMessageDiv = document.getElementById("errorMessage");
+            errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
+            setTimeout(() => {
+              errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
+            }, 5000);
+            break;
+          }
         }
       }
 
