@@ -34,72 +34,87 @@
 <div id="wordList" style="display: none;"></div>
 <div id="editForm" style="display: none;"></div>
 <script>
-  // Object for both word pairs and synonyms
   let wordData = {
     "hello": {
       translation: "привет",
-      synonyms: ["hi", "hey", "greetings"]
+      synonyms: ["hi", "hey", "greetings"],
+      disabled: false
     },
     "greetings": {
       translation: "привет",
-      synonyms: ["hello", "hi", "hey"]
+      synonyms: ["hello", "hi", "hey"],
+      disabled: false
     },
     "hi": {
       translation: "привет",
-      synonyms: ["hello", "greetings", "hey"]
+      synonyms: ["hello", "greetings", "hey"],
+      disabled: false
     },
     "hey": {
       translation: "привет",
-      synonyms: ["hello", "greetings", "hi"]
+      synonyms: ["hello", "greetings", "hi"],
+      disabled: false
     },
     "world": {
       translation: "мир",
-      synonyms: ["earth", "globe", "planet"]
+      synonyms: ["earth", "globe", "planet"],
+      disabled: false
     },
     "earth": {
       translation: "мир",
-      synonyms: ["world", "globe", "planet"]
+      synonyms: ["world", "globe", "planet"],
+      disabled: false
     },
     "globe": {
       translation: "мир",
-      synonyms: ["world", "earth", "planet"]
+      synonyms: ["world", "earth", "planet"],
+      disabled: false
     },
     "planet": {
       translation: "мир",
-      synonyms: ["world", "earth", "globe"]
+      synonyms: ["world", "earth", "globe"],
+      disabled: false
     },
     "goodbye": {
       translation: "пока",
-      synonyms: ["farewell", "bye", "see you"]
+      synonyms: ["farewell", "bye", "see you"],
+      disabled: false
     },
     "farewell": {
       translation: "пока",
-      synonyms: ["goodbye", "bye", "see you"]
+      synonyms: ["goodbye", "bye", "see you"],
+      disabled: false
     },
     "bye": {
       translation: "пока",
-      synonyms: ["goodbye", "farewell", "see you"]
+      synonyms: ["goodbye", "farewell", "see you"],
+      disabled: false
     },
     "see you": {
       translation: "пока",
-      synonyms: ["goodbye", "farewell", "bye"]
+      synonyms: ["goodbye", "farewell", "bye"],
+      disabled: false
     },
     "house": {
       translation: "дом",
-      synonyms: ["home", "residence", "dwelling"]
+      synonyms: ["home", "residence", "dwelling"],
+      disabled: false
     },
     "home": {
       translation: "дом",
-      synonyms: ["house", "residence", "dwelling"]
+      synonyms: ["house", "residence", "dwelling"],
+      disabled: false
     },
     "residence": {
       translation: "дом",
-      synonyms: ["house", "home", "dwelling"]
+      synonyms: ["house", "home", "dwelling"],
+      disabled: false
     },
     "dwelling": {
       translation: "дом",
-      synonyms: ["house", "home", "residence"]
-    },
+      synonyms: ["house", "home", "residence"],
+      disabled: false
+    }
     // Add more word pairs as needed
   };
 
@@ -129,10 +144,10 @@
 
   function nextWord() {
     const words = Object.keys(wordData).filter(word => !wordData[word].disabled);
-    if (words.length === 0) return; // No enabled words left
+    if (words.length === 0) return;
 
     currentIndex = (currentIndex + 1) % words.length;
-    showTranslationMode = false; // Reset to default
+    showTranslationMode = false;
     displayWord();
   }
 
@@ -152,7 +167,6 @@
             .map(synonym => synonym.trim().toLowerCase());
 
     if (newWord !== "" && newTranslation !== "") {
-      // Check if all synonyms are valid words
       let allValidSynonyms = true;
 
       if (!!newSynonymsInput.value && newSynonymsInput.value.length > 0) {
@@ -162,7 +176,7 @@
             const errorMessageDiv = document.getElementById("errorMessage");
             errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
             setTimeout(() => {
-              errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
+              errorMessageDiv.innerText = "";
             }, 5000);
             break;
           }
@@ -170,22 +184,21 @@
       }
 
       if (allValidSynonyms) {
-        // Add the new word pair and its synonyms to the wordData object
         wordData[newWord] = {
           translation: newTranslation,
-          synonyms: newSynonyms
+          synonyms: newSynonyms,
+          disabled: false
         };
 
         for (const synonym of newSynonyms) {
-          // Add the synonym and its translation to wordData if it doesn't exist
           if (!wordData.hasOwnProperty(synonym)) {
             wordData[synonym] = {
-              translation: "", // You can set the translation for each synonym separately
-              synonyms: [] // You can set the synonyms for each synonym separately
+              translation: "",
+              synonyms: [],
+              disabled: false
             };
           }
 
-          // Add the word as a synonym to the synonym's wordData entry
           if (!wordData[synonym].synonyms.includes(newWord)) {
             wordData[synonym].synonyms.push(newWord);
           }
@@ -195,7 +208,7 @@
         newTranslationInput.value = "";
         newSynonymsInput.value = "";
 
-        displayWord(); // Update the displayed word after adding new word pair
+        displayWord();
       }
     }
   }
@@ -284,8 +297,8 @@
   function deleteSynonymField(deleteButton) {
     const parentDiv = deleteButton.parentNode;
     const indexToDelete = Array.from(parentDiv.children).indexOf(deleteButton) - 1;
-    parentDiv.removeChild(deleteButton); // Remove the delete button
-    parentDiv.removeChild(parentDiv.children[indexToDelete]); // Remove the corresponding input field
+    parentDiv.removeChild(deleteButton);
+    parentDiv.removeChild(parentDiv.children[indexToDelete]);
   }
 
   function saveEditedWordPair(word) {
@@ -303,7 +316,6 @@
     }
 
     if (editedWord !== "" && editedTranslation !== "") {
-      // Check if all synonyms are valid words
       let allValidSynonyms = true;
       for (const synonym of editedSynonyms) {
         if (!wordData.hasOwnProperty(synonym)) {
@@ -311,7 +323,7 @@
           const errorMessageDiv = document.getElementById("errorMessage");
           errorMessageDiv.innerText = `Error: Synonym "${synonym}" doesn't exist as an English word. Please add it to the word pairs first.`;
           setTimeout(() => {
-            errorMessageDiv.innerText = ""; // Clear the error message after a few seconds
+            errorMessageDiv.innerText = "";
           }, 5000);
           break;
         }
@@ -321,15 +333,13 @@
         wordData[editedWord] = {
           translation: editedTranslation,
           synonyms: editedSynonyms,
-          disabled: wordData[word].disabled // Preserve the disabled attribute
+          disabled: wordData[word].disabled
         };
 
-        // If the word has been changed, delete the old word entry
         if (editedWord !== word) {
           delete wordData[word];
         }
 
-        // Update synonyms for other words that had the old word as a synonym
         for (const otherWord in wordData) {
           if (wordData[otherWord].synonyms.includes(word)) {
             const synonymIndex = wordData[otherWord].synonyms.indexOf(word);
@@ -357,7 +367,6 @@
     fileInput.click();
   }
 
-  // Function to handle the file input and read JSON data
   function loadWordsFromFile(event) {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -366,9 +375,9 @@
       const jsonData = JSON.parse(reader.result);
       if (typeof jsonData === 'object') {
         wordData = jsonData;
-        currentIndex = 0; // Reset the current index to 0 after loading new word pairs
-        showAllWordsFlag = false; // Hide the word list if open
-        displayWord(); // Display the first word from the loaded data
+        currentIndex = 0;
+        showAllWordsFlag = false;
+        displayWord();
       } else {
         console.error("Invalid JSON format.");
       }
@@ -377,7 +386,6 @@
     reader.readAsText(file);
   }
 
-  // Function to save words to a JSON file
   function saveWords() {
     const jsonData = JSON.stringify(wordData, null, 2);
     const blob = new Blob([jsonData], { type: "application/json" });
@@ -391,18 +399,16 @@
     URL.revokeObjectURL(url);
   }
 
-  // Add deleteAllWords function
   function deleteAllWords() {
     const confirmed = confirm("Are you sure you want to delete all word pairs?");
     if (confirmed) {
-      wordData = {}; // Clear the wordData object
-      currentIndex = 0; // Reset the current index to 0
-      showAllWordsFlag = false; // Hide the word list if open
-      displayWord(); // Display the first word (or empty) after deleting all words
+      wordData = {};
+      currentIndex = 0;
+      showAllWordsFlag = false;
+      displayWord();
     }
   }
 
-  // Initial display
   displayWord();
 </script>
 </body>
