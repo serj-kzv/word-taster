@@ -110,11 +110,13 @@
     const wordDisplay = document.getElementById("wordDisplay");
     const word = Object.keys(wordData)[currentIndex];
 
-    if (showTranslationMode) {
-      const synonymsDisplay = showSynonyms ? `- ${wordData[word].synonyms.join(", ")}` : "";
-      wordDisplay.innerHTML = `<strong>${word}</strong> ${synonymsDisplay} - ${wordData[word].translation}`;
-    } else {
-      wordDisplay.innerText = showSynonyms ? `${word} - ${wordData[word].synonyms.join(", ")}` : word;
+    if (wordData[word]) {
+      if (showTranslationMode) {
+        const synonymsDisplay = showSynonyms ? `- ${wordData[word].synonyms.join(", ")}` : "";
+        wordDisplay.innerHTML = `<strong>${word}</strong> ${synonymsDisplay} - ${wordData[word].translation}`;
+      } else {
+        wordDisplay.innerText = showSynonyms ? `${word} - ${wordData[word].synonyms.join(", ")}` : word;
+      }
     }
   }
 
@@ -219,7 +221,10 @@
     let wordListHTML = '<h2>All Word Pairs</h2>';
 
     for (const word in wordData) {
-      const disabledAttribute = wordData[word].disabled ? "true" : "false";
+      let disabledAttribute = "false";
+      if (wordData[word]) {
+        disabledAttribute = wordData[word].disabled ? "true" : "false";
+      }
       wordListHTML += `
         <div>
           <input type="checkbox" id="${word}" checked="${disabledAttribute}" onchange="toggleDisabled('${word}')">
